@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox prefHeight="600.0" prefWidth="800.0" spacing="30.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.lodz.p.krypto2.HelloController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <VBox spacing="10.0">
+        <HBox spacing="10.0">
+            <TextField fx:id="keyTextField" promptText="Podaj 24-znakowy klucz..." HBox.hgrow="ALWAYS">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </TextField>
+            <Button fx:id="generateKeyButton" prefWidth="120.0" text="Generuj">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Button>
+        </HBox>
+        <HBox spacing="10.0">
+            <Button fx:id="loadKeyButton" text="wczytaj klucz z pliku" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="saveKeyButton" text="zapisz klucz do pliku" />
+        </HBox>
+    </VBox>
+
+    <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+
+        <VBox prefWidth="250.0" spacing="10.0" HBox.hgrow="ALWAYS">
+            <Label text="Input">
+                <font>
+                    <Font name="System Bold" size="12.0" />
+                </font>
+            </Label>
+            <Button fx:id="loadInputFileButton" maxWidth="1.7976931348623157E308" text="wczytaj plik" />
+         <Text fill="#48cc67" strokeType="OUTSIDE" strokeWidth="0.0" fx:id="inputFileInfoText">
+            <font>
+               <Font name="System Bold" size="16.0" />
+            </font>
+         </Text>
+            <TextArea fx:id="inputTextArea" promptText="podaj tekst..." wrapText="true" VBox.vgrow="ALWAYS" />
+        </VBox>
+
+        <VBox alignment="CENTER_LEFT" prefWidth="150.0" spacing="15.0">
+            <fx:define>
+                <ToggleGroup fx:id="inputTypeGroup" />
+            </fx:define>
+            <RadioButton fx:id="radioFile" text="plik">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            <toggleGroup>
+               <ToggleGroup fx:id="inputTypeGroup" />
+            </toggleGroup>
+            </RadioButton>
+            <RadioButton fx:id="radioText" selected="true" text="tekst" toggleGroup="$inputTypeGroup">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </RadioButton>
+
+            <Region prefHeight="20.0" /> <Button fx:id="encipherButton" maxWidth="1.7976931348623157E308" text="szyfruj">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Button>
+            <Button fx:id="decipherButton" maxWidth="1.7976931348623157E308" text="deszyfruj">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Button>
+        </VBox>
+
+        <VBox prefWidth="250.0" spacing="10.0" HBox.hgrow="ALWAYS">
+            <Label text="Output">
+                <font>
+                    <Font name="System Bold" size="12.0" />
+                </font>
+            </Label>
+            <Button fx:id="saveOutputFileButton" maxWidth="1.7976931348623157E308" text="zapisz plik" />
+         <Text fill="#48cc67" strokeType="OUTSIDE" strokeWidth="0.0" fx:id="outputFileInfoText">
+            <font>
+               <Font name="System Bold" size="16.0" />
+            </font>
+         </Text>
+            <TextArea fx:id="outputTextArea" editable="false" promptText="rezultat" wrapText="true" VBox.vgrow="ALWAYS" />
+        </VBox>
+
+    </HBox>
+</VBox>
