@@ -5,7 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Elgamal {
     private final SecureRandom secureRandom;
@@ -52,18 +54,18 @@ public class Elgamal {
                 IO.println("C2: " + c2Bytes.length);
 
                 if (c1Bytes.length > 0 && c1Bytes[0] == 0) {
-                    dos.writeInt(c1Bytes.length - 1);
+                    dos.writeShort(c1Bytes.length - 1);
                     dos.write(c1Bytes, 1, c1Bytes.length - 1);
                 } else {
-                    dos.writeInt(c1Bytes.length);
+                    dos.writeShort(c1Bytes.length);
                     dos.write(c1Bytes);
                 }
 
                 if (c2Bytes.length > 0 && c2Bytes[0] == 0) {
-                    dos.writeInt(c2Bytes.length - 1);
+                    dos.writeShort(c2Bytes.length - 1);
                     dos.write(c2Bytes, 1, c2Bytes.length - 1);
                 } else {
-                    dos.writeInt(c2Bytes.length);
+                    dos.writeShort(c2Bytes.length);
                     dos.write(c2Bytes);
                 }
             }
@@ -129,9 +131,24 @@ public class Elgamal {
         return result;
     }
 
+    private BigInteger[] divideEncipheredIntoBlocks(byte[] data) {
+        List<BigInteger> blocks = new ArrayList<>();
 
-    public BigInteger[] divideEncipheredIntoBlocks(byte[] data) {
+        int index = 0;
 
+        while (index < data.length) {
+            short blockLength = data[index];
+            blockLength = (short) ((blockLength << 8) | data[index + 1]);
+            BigInteger block = new BigInteger(Arrays.copyOfRange(data, index + 2, index + blockLength + 2));
+            blocks.add(block);
+
+            index += blockLength + 2;
+        }
+
+        return blocks.toArray(new BigInteger[0]);
+    }
+
+    public BigInteger[] divideEncipheredIntoBlocks2(byte[] data) {
         int c1_count = 0;
         int i = 0;
         while (i < data.length){
