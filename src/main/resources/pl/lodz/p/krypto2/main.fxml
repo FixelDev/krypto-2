@@ -9,28 +9,58 @@
 <?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox prefHeight="600.0" prefWidth="800.0" spacing="30.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.lodz.p.krypto2.HelloController">
+<VBox prefHeight="650.0" prefWidth="850.0" spacing="25.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pl.lodz.p.krypto2.HelloController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
+    <!-- SEKCJA KLUCZA -->
     <VBox spacing="10.0">
+        <HBox spacing="20.0">
+            <fx:define>
+                <ToggleGroup fx:id="modeGroup" />
+            </fx:define>
+            <RadioButton fx:id="radioEncryptMode" text="Tryb: Szyfrowanie (Klucz publiczny)" selected="true" toggleGroup="$modeGroup">
+                <font><Font name="System Bold" size="12.0" /></font>
+            </RadioButton>
+            <RadioButton fx:id="radioDecryptMode" text="Tryb: Deszyfrowanie (Klucz prywatny)" toggleGroup="$modeGroup">
+                <font><Font name="System Bold" size="12.0" /></font>
+            </RadioButton>
+        </HBox>
+
         <HBox spacing="10.0">
-            <TextField fx:id="keyTextField" promptText="Podaj 24-znakowy klucz..." HBox.hgrow="ALWAYS">
-                <font>
-                    <Font size="14.0" />
-                </font>
-            </TextField>
+            <StackPane HBox.hgrow="ALWAYS">
+                <HBox fx:id="publicKeyBox" spacing="10.0">
+                    <TextField fx:id="pubKeyP" promptText="p (Liczba pierwsza)" HBox.hgrow="ALWAYS">
+                        <font><Font size="14.0" /></font>
+                    </TextField>
+                    <TextField fx:id="pubKeyG" promptText="g (Generator)" HBox.hgrow="ALWAYS">
+                        <font><Font size="14.0" /></font>
+                    </TextField>
+                    <TextField fx:id="pubKeyH" promptText="h (Klucz publiczny)" HBox.hgrow="ALWAYS">
+                        <font><Font size="14.0" /></font>
+                    </TextField>
+                </HBox>
+
+                <HBox fx:id="privateKeyBox" spacing="10.0" visible="false">
+                    <TextField fx:id="privKeyX" promptText="x (Klucz prywatny)" HBox.hgrow="ALWAYS">
+                        <font><Font size="14.0" /></font>
+                    </TextField>
+                </HBox>
+            </StackPane>
+
             <Button fx:id="generateKeyButton" prefWidth="120.0" text="Generuj">
                 <font>
                     <Font size="14.0" />
                 </font>
             </Button>
         </HBox>
+
         <HBox spacing="10.0">
             <Button fx:id="loadKeyButton" text="wczytaj klucz z pliku" />
             <Region HBox.hgrow="ALWAYS" />
@@ -38,67 +68,50 @@
         </HBox>
     </VBox>
 
+    <!-- SEKCJA WEJŚCIA / WYJŚCIA -->
     <HBox spacing="20.0" VBox.vgrow="ALWAYS">
-
+        <!-- Input -->
         <VBox prefWidth="250.0" spacing="10.0" HBox.hgrow="ALWAYS">
             <Label text="Input">
-                <font>
-                    <Font name="System Bold" size="12.0" />
-                </font>
+                <font><Font name="System Bold" size="12.0" /></font>
             </Label>
             <Button fx:id="loadInputFileButton" maxWidth="1.7976931348623157E308" text="wczytaj plik" />
-         <Text fill="#48cc67" strokeType="OUTSIDE" strokeWidth="0.0" fx:id="inputFileInfoText">
-            <font>
-               <Font name="System Bold" size="16.0" />
-            </font>
-         </Text>
+            <Text fill="#48cc67" strokeType="OUTSIDE" strokeWidth="0.0" fx:id="inputFileInfoText">
+                <font><Font name="System Bold" size="16.0" /></font>
+            </Text>
             <TextArea fx:id="inputTextArea" promptText="podaj tekst..." wrapText="true" VBox.vgrow="ALWAYS" />
         </VBox>
 
+        <!-- Akcje centralne -->
         <VBox alignment="CENTER_LEFT" prefWidth="150.0" spacing="15.0">
             <fx:define>
                 <ToggleGroup fx:id="inputTypeGroup" />
             </fx:define>
-            <RadioButton fx:id="radioFile" text="plik">
-                <font>
-                    <Font size="14.0" />
-                </font>
-            <toggleGroup>
-               <ToggleGroup fx:id="inputTypeGroup" />
-            </toggleGroup>
+            <RadioButton fx:id="radioFile" text="plik" toggleGroup="$inputTypeGroup">
+                <font><Font size="14.0" /></font>
             </RadioButton>
             <RadioButton fx:id="radioText" selected="true" text="tekst" toggleGroup="$inputTypeGroup">
-                <font>
-                    <Font size="14.0" />
-                </font>
+                <font><Font size="14.0" /></font>
             </RadioButton>
 
-            <Region prefHeight="20.0" /> <Button fx:id="encipherButton" maxWidth="1.7976931348623157E308" text="szyfruj">
-            <font>
-                <Font size="14.0" />
-            </font>
-        </Button>
-            <Button fx:id="decipherButton" maxWidth="1.7976931348623157E308" text="deszyfruj">
-                <font>
-                    <Font size="14.0" />
-                </font>
+            <Region prefHeight="20.0" />
+
+            <!-- NOWY PRZYCISK KONWERTUJ -->
+            <Button fx:id="convertButton" maxWidth="1.7976931348623157E308" text="konwertuj">
+                <font><Font name="System normal" size="14.0" /></font>
             </Button>
         </VBox>
 
+        <!-- Output -->
         <VBox prefWidth="250.0" spacing="10.0" HBox.hgrow="ALWAYS">
             <Label text="Output">
-                <font>
-                    <Font name="System Bold" size="12.0" />
-                </font>
+                <font><Font name="System Bold" size="12.0" /></font>
             </Label>
             <Button fx:id="saveOutputFileButton" maxWidth="1.7976931348623157E308" text="zapisz plik" />
-         <Text fill="#48cc67" strokeType="OUTSIDE" strokeWidth="0.0" fx:id="outputFileInfoText">
-            <font>
-               <Font name="System Bold" size="16.0" />
-            </font>
-         </Text>
+            <Text fill="#48cc67" strokeType="OUTSIDE" strokeWidth="0.0" fx:id="outputFileInfoText">
+                <font><Font name="System Bold" size="16.0" /></font>
+            </Text>
             <TextArea fx:id="outputTextArea" editable="false" promptText="rezultat" wrapText="true" VBox.vgrow="ALWAYS" />
         </VBox>
-
     </HBox>
 </VBox>

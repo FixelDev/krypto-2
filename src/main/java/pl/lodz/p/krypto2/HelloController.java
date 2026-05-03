@@ -2,6 +2,7 @@ package pl.lodz.p.krypto2;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -15,34 +16,21 @@ import java.nio.file.Paths;
 import java.util.Base64;
 
 public class HelloController {
-    @FXML
-    private Text outputFileInfoText;
-    @FXML
-    private Text inputFileInfoText;
-    @FXML
-	private Button loadInputFileButton;
-    @FXML
-	private TextArea inputTextArea;
-    @FXML
-	private Button encipherButton;
-    @FXML
-	private Button decipherButton;
-    @FXML
-	private Button saveOutputFileButton;
-    @FXML
-	private TextArea outputTextArea;
-    @FXML
-    private Button saveKeyButton;
-    @FXML
-    private TextField keyTextField;
-    @FXML
-    private Button generateKeyButton;
-    @FXML
-    private Button loadKeyButton;
-    @FXML
-    private ToggleGroup inputTypeGroup;
+    @FXML private Text outputFileInfoText;
+    @FXML private Text inputFileInfoText;
+    @FXML private Button loadInputFileButton;
+    @FXML private TextArea inputTextArea;
+    @FXML private Button saveOutputFileButton;
+    @FXML private TextArea outputTextArea;
+    @FXML private Button saveKeyButton;
+    @FXML private Button generateKeyButton;
+    @FXML private Button loadKeyButton;
+    @FXML private ToggleGroup inputTypeGroup;
+    @FXML private RadioButton radioEncryptMode;
+    @FXML private HBox publicKeyBox;
+    @FXML private HBox privateKeyBox;
+    @FXML private Button convertButton;
 
-//    private KeyGenerator keyGenerator;
     private byte[] keyBytes;
     private byte[] inputDataBytes;
     private byte[] outputDataBytes;
@@ -60,16 +48,10 @@ public class HelloController {
     @FXML
     public void initialize() {
 
-//        final int MAX_CHARS = 24;
-        keyTextField.setTextFormatter(new TextFormatter<String>(change -> {
-//            if (change.getControlNewText().length() <= MAX_CHARS) {
-//                return change;
-//            }
-//            return null;
-            return change;
-        }));
-
-//        keyGenerator = new KeyGenerator();
+        radioEncryptMode.selectedProperty().addListener((observable, wasSelected, isNowSelected) -> {
+            publicKeyBox.setVisible(isNowSelected);
+            privateKeyBox.setVisible(!isNowSelected);
+        });
 
         generateKeyButton.setOnAction(event -> generateKey());
 
@@ -81,36 +63,12 @@ public class HelloController {
             saveKeyToFile();
         });
 
-        encipherButton.setOnAction(event -> {
-            keyBytes = keyTextField.getText().getBytes();
-
-            if(isKeyInvalid()) return;
-
-            DATA_TYPE selectedDataType = getSelectedDataType();
-
-            switch (selectedDataType) {
-                case DATA_TYPE.FILE:
-                    break;
-                case DATA_TYPE.TEXT:
-                    break;
+        convertButton.setOnAction(event -> {
+            if (radioEncryptMode.isSelected()) {
+                // Tutaj metoda szyfrująca
+            } else {
+                // Tutaj metoda deszyfrująca
             }
-
-        });
-
-        decipherButton.setOnAction(event -> {
-            keyBytes = keyTextField.getText().getBytes();
-
-            if (isKeyInvalid()) return;
-
-            DATA_TYPE selectedDataType = getSelectedDataType();
-
-            switch (selectedDataType) {
-                case DATA_TYPE.FILE:
-                    break;
-                case DATA_TYPE.TEXT:
-                    break;
-            }
-
         });
 
         loadInputFileButton.setOnAction(event -> {
@@ -218,8 +176,7 @@ public class HelloController {
             throw new RuntimeException(e);
         }
 
-        keyBytes = keyTextField.getText().getBytes();
-        Dao.writeToFile(path, keyBytes);
+//        Dao.writeToFile(path, keyBytes);
     }
 
     private void loadKeyFromFile() {
@@ -275,8 +232,6 @@ public class HelloController {
 
     private void updateKeyTextField() {
         String keyString = new String(keyBytes, StandardCharsets.UTF_8);
-        keyTextField.setText(keyString);
-
     }
 
     private Path chooseFilePath(Window ownerWindow, String windowName, MODE mode) throws FileNotFoundException {
