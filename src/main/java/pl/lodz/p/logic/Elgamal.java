@@ -26,9 +26,9 @@ public class Elgamal {
         g = generateRandomNumber(BigInteger.TWO, p.subtract(BigInteger.TWO));
         a = generateRandomNumber(BigInteger.TWO, p.subtract(BigInteger.TWO));
         h = g.modPow(a, p);
-
         MAX_BLOCK_BYTE_SIZE = KEY_BYTE_SIZE - 1;
     }
+
 
     private BigInteger generateRandomNumber(BigInteger minNumber, BigInteger maxNumber) {
         BigInteger randomNumber;
@@ -57,8 +57,8 @@ public class Elgamal {
 
             byte[] c1Bytes = Utils.bigIntegerToByteArray(c1);
             byte[] c2Bytes = Utils.bigIntegerToByteArray(c2);
-
             int originalBlockSize = blockBytes.length;
+
             int c1Size = c1Bytes.length;
             int c2Size = c2Bytes.length;
 
@@ -114,126 +114,5 @@ public class Elgamal {
         }
 
         return decipheredDataByteStream.toByteArray();
-
-//        BigInteger[] dataBlocks = divideEncipheredIntoBlocks(data);
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//
-//        for (int i = 0; i < dataBlocks.length - 1; i++) {
-//            BigInteger c1 = dataBlocks[i];
-//            BigInteger c2 = dataBlocks[i + 1];
-//
-//            BigInteger decipheredBlock = c2.multiply(c1.modPow(a, p).modInverse(p)).mod(p);
-//            byte[] decipheredBlockBytes = decipheredBlock.toByteArray();
-//
-//            if (decipheredBlockBytes.length > 0 && decipheredBlockBytes[0] == 0) {
-//                outputStream.write(decipheredBlockBytes, 1, decipheredBlockBytes.length - 1);
-//            } else {
-//                outputStream.writeBytes(decipheredBlockBytes);
-//            }
-//        }
-//
-//        return outputStream.toByteArray();
     }
-
-
-    public BigInteger[] divideIntoBlocks(byte[] data) {
-        int blocksCount = data.length / 255;
-
-        int finalBlocksCount = blocksCount;
-        if ((blocksCount * 255) < data.length ) {
-            finalBlocksCount += 1;
-        }
-
-        BigInteger[] result = new BigInteger[finalBlocksCount];
-
-        for (int i = 0; i < blocksCount; i++) {
-            result[i] = new BigInteger(Arrays.copyOfRange(data, i * 255, (i + 1) * 255));
-        }
-
-        if (finalBlocksCount > blocksCount) {
-            int i = finalBlocksCount - 1;
-            result[i] = new BigInteger(Arrays.copyOfRange(data, i * 255, (i + 1) * 255));
-        }
-
-        return result;
-    }
-
-    private BigInteger[] divideEncipheredIntoBlocks(byte[] data) {
-        List<BigInteger> blocks = new ArrayList<>();
-
-        int index = 0;
-
-        while (index < data.length) {
-            short blockLength = data[index];
-            blockLength = (short) ((blockLength << 8) | data[index + 1]);
-            BigInteger block = new BigInteger(Arrays.copyOfRange(data, index + 2, index + blockLength + 2));
-            blocks.add(block);
-
-            index += blockLength + 2;
-        }
-
-        return blocks.toArray(new BigInteger[0]);
-    }
-
-    public BigInteger[] divideEncipheredIntoBlocks2(byte[] data) {
-        int c1_count = 0;
-        int i = 0;
-        while (i < data.length){
-
-
-            int c1length = data[i];
-            c1length <<= 8;
-            c1length = c1length | data[i + 1] & 0xFF;
-
-
-            IO.println("C1: " + c1length);
-            int c2length = data[i + 1 + c1length];
-            c2length <<= 8;
-            c2length = c2length | data[i + c1length + 1] & 0xFF;
-
-            IO.println("C2: " + c2length);
-
-            int c2_end = i + 1 + c1length + 1 + c2length;
-            c1_count++;
-            i = c2_end;
-        }
-
-
-        BigInteger[] result = new BigInteger[c1_count];
-
-        int currentElement = 0;
-        i = 0;
-        while (i < data.length){
-            int c1length = data[i];
-            c1length <<= 8;
-            c1length = c1length | data[i + 1] & 0xFF;
-
-
-            IO.println("C1: " + c1length);
-            int c2length = data[i + 1 + c1length];
-            c2length <<= 8;
-            c2length = c2length | data[i + c1length + 1] & 0xFF;
-
-            IO.println("C2: " + c2length);
-
-
-            int c1_end = i + 1 + c1length;
-            int c2_end = c1_end + 1 + c2length;
-            BigInteger c1 = new BigInteger(Arrays.copyOfRange(data, i, c1_end));
-            BigInteger c2 = new BigInteger(Arrays.copyOfRange(data, c1_end, c2_end));
-
-            i = c2_end;
-
-            result[currentElement] = c1;
-            result[currentElement + 1] = c2;
-            currentElement += 2;
-        }
-
-        return result;
-    }
-
 }
-
-
-
-
