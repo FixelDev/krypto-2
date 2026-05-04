@@ -1,5 +1,7 @@
 package pl.lodz.p.krypto2;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
@@ -8,17 +10,22 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import pl.lodz.p.logic.Dao;
 import pl.lodz.p.logic.Elgamal;
-
-import javax.crypto.KeyGenerator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import pl.lodz.p.logic.KeyGenerator;
 
 public class HelloController {
+    @FXML private TextField pubKeyP;
+    @FXML private TextField pubKeyG;
+    @FXML private TextField pubKeyH;
+    @FXML private TextField privKeyP;
+    @FXML private TextField privKeyX;
     @FXML private Text outputFileInfoText;
     @FXML private Text inputFileInfoText;
     @FXML private Button loadInputFileButton;
@@ -33,9 +40,9 @@ public class HelloController {
     @FXML private Button convertButton;
     @FXML private ComboBox<String> keyLengthComboBox;
 
-    private byte[] keyBytes;
     private byte[] inputDataBytes;
     private byte[] outputDataBytes;
+    private int wantedKeyLength;
 
     private KeyGenerator keyGenerator;
 
@@ -56,8 +63,6 @@ public class HelloController {
             publicKeyBox.setVisible(isNowSelected);
             privateKeyBox.setVisible(!isNowSelected);
         });
-
-        generateKeyButton.setOnAction(event -> generateKey());
 
         convertButton.setOnAction(event -> {
             if (radioEncryptMode.isSelected()) {
@@ -86,9 +91,11 @@ public class HelloController {
         keyLengthComboBox.getItems().addAll("2048", "1024", "512");
         keyLengthComboBox.getSelectionModel().selectFirst();
 
+
         generateKeyButton.setOnAction(event -> {
-            String selectedBits = keyLengthComboBox.getValue();
-            int bits = Integer.parseInt(selectedBits);
+            wantedKeyLength = Integer.parseInt(keyLengthComboBox.getValue());
+            IO.println("Generating key...");
+            generateKey();
         });
     }
 
@@ -145,20 +152,6 @@ public class HelloController {
         alert.show();
     }
 
-    private void getWantedKeyLength(){
-
-    }
-
-
-    // TODO: przerobić na pozostałe długości
-    private boolean isKeyInvalid() {
-        if (keyBytes.length != 24) {
-            showAlert(Alert.AlertType.ERROR, "Błąd", "Podany klucz nie ma wymaganej długości. Podaj poprawny klucz");
-            return true;
-        }
-        return false;
-    }
-
     private void saveFile() {
         Window mainWindow = loadInputFileButton.getScene().getWindow();
         Path path = null;
@@ -190,7 +183,8 @@ public class HelloController {
             throw new NullPointerException();
         }
 
-        Elgamal elgamal = new Elgamal(, keyGenerator.getP(), keyGenerator.getG(), keyGenerator.getA(), keyGenerator.getH());
+        Elgamal elgamal = new Elgamal(wantedKeyLength / 8, new BigInteger(pubKeyP.getText().trim(), 16), new BigInteger(pubKeyG.getText().trim(), 16), new BigInteger(privKeyX.getText().trim(), 16), new BigInteger(pubKeyH.getText().trim(), 16));
+
         try {
             outputDataBytes = elgamal.encipher(inputDataBytes);
         } catch (IOException e) {
@@ -203,7 +197,7 @@ public class HelloController {
             throw new NullPointerException();
         }
 
-        Elgamal elgamal = new Elgamal(, keyGenerator.getP(), keyGenerator.getG(), keyGenerator.getA(), keyGenerator.getH());
+        Elgamal elgamal = new Elgamal(wantedKeyLength / 8, new BigInteger(pubKeyP.getText().trim(), 16), new BigInteger(pubKeyG.getText().trim(), 16), new BigInteger(privKeyX.getText().trim(), 16), new BigInteger(pubKeyH.getText().trim(), 16));
         try {
             outputDataBytes = elgamal.decipher(inputDataBytes);
         } catch (IOException e) {
@@ -211,18 +205,16 @@ public class HelloController {
         }
     }
 
-
-    // TODO: uaktualnić
     private void generateKey() {
-//        keyBytes = keyGenerator.getRandomKey();
-//        updateKeyTextField();
-
-        keyGenerator = new KeyGenerator();
-
+        keyGenerator = new KeyGenerator(wantedKeyLength / 8);
+        updateKeyTextField();
     }
 
     private void updateKeyTextField() {
-        String keyString = new String(keyBytes, StandardCharsets.UTF_8);
+        pubKeyP.setText(keyGenerator.getP().toString(16));
+        pubKeyG.setText(keyGenerator.getG().toString(16));
+        pubKeyH.setText(keyGenerator.getH().toString(16));
+        privKeyX.setText(keyGenerator.getA().toString(16));
     }
 
     private Path chooseFilePath(Window ownerWindow, String windowName, MODE mode) throws FileNotFoundException {

@@ -3,13 +3,13 @@ package pl.lodz.p.logic;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-public class KeyGenerataor {
+public class KeyGenerator {
     private final BigInteger p;
     private final BigInteger g;
     private final BigInteger a;
     private final BigInteger h;
 
-    public KeyGenerataor(int keyBytesSize) {
+    public KeyGenerator(int keyBytesSize) {
         SecureRandom secureRandom = new SecureRandom();
 
         this.p = BigInteger.probablePrime(keyBytesSize * 8, secureRandom);

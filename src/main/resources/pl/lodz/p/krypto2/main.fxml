@@ -33,39 +33,64 @@
             </RadioButton>
         </HBox>
 
-        <HBox spacing="10.0" alignment="CENTER_LEFT">
+        <HBox spacing="10.0" alignment="BOTTOM_LEFT">
             <StackPane HBox.hgrow="ALWAYS">
+                <!-- Kontener klucza publicznego -->
                 <HBox fx:id="publicKeyBox" spacing="10.0">
-                    <TextField fx:id="pubKeyP" promptText="p (Liczba pierwsza)" HBox.hgrow="ALWAYS">
-                        <font><Font size="14.0" /></font>
-                    </TextField>
-                    <TextField fx:id="pubKeyG" promptText="g (Generator)" HBox.hgrow="ALWAYS">
-                        <font><Font size="14.0" /></font>
-                    </TextField>
-                    <TextField fx:id="pubKeyH" promptText="h (Klucz publiczny)" HBox.hgrow="ALWAYS">
-                        <font><Font size="14.0" /></font>
-                    </TextField>
+                    <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                        <Label text="p (Liczba pierwsza)">
+                            <font><Font name="System Bold" size="12.0" /></font>
+                        </Label>
+                        <TextField fx:id="pubKeyP" promptText="Wartość p" VBox.vgrow="ALWAYS">
+                            <font><Font size="14.0" /></font>
+                        </TextField>
+                    </VBox>
+
+                    <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                        <Label text="g (Generator)">
+                            <font><Font name="System Bold" size="12.0" /></font>
+                        </Label>
+                        <TextField fx:id="pubKeyG" promptText="Wartość g" VBox.vgrow="ALWAYS">
+                            <font><Font size="14.0" /></font>
+                        </TextField>
+                    </VBox>
+
+                    <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                        <Label text="h (Klucz publiczny)">
+                            <font><Font name="System Bold" size="12.0" /></font>
+                        </Label>
+                        <TextField fx:id="pubKeyH" promptText="Wartość h" VBox.vgrow="ALWAYS">
+                            <font><Font size="14.0" /></font>
+                        </TextField>
+                    </VBox>
                 </HBox>
 
+                <!-- Kontener klucza prywatnego -->
                 <HBox fx:id="privateKeyBox" spacing="10.0" visible="false">
-                    <!-- Dodano pole p do deszyfrowania, gdyż jest niezbędne do operacji modulo -->
-                    <TextField fx:id="privKeyP" promptText="p (Liczba pierwsza)" HBox.hgrow="ALWAYS">
-                        <font><Font size="14.0" /></font>
-                    </TextField>
-                    <TextField fx:id="privKeyX" promptText="x (Klucz prywatny)" HBox.hgrow="ALWAYS">
-                        <font><Font size="14.0" /></font>
-                    </TextField>
+                    <VBox HBox.hgrow="ALWAYS" spacing="5.0">
+                        <Label text="a (Klucz prywatny)">
+                            <font><Font name="System Bold" size="12.0" /></font>
+                        </Label>
+                        <TextField fx:id="privKeyX" promptText="Wartość a" VBox.vgrow="ALWAYS">
+                            <font><Font size="14.0" /></font>
+                        </TextField>
+                    </VBox>
                 </HBox>
             </StackPane>
 
-            <!-- NOWY ELEMENT: Lista rozwijana z długością klucza -->
-            <ComboBox fx:id="keyLengthComboBox" prefWidth="100.0" promptText="Bity" />
+            <VBox spacing="5.0">
+                <Label text="Długość">
+                    <font><Font name="System Bold" size="12.0" /></font>
+                </Label>
+                <ComboBox fx:id="keyLengthComboBox" prefWidth="100.0" promptText="Bity" />
+            </VBox>
 
             <Button fx:id="generateKeyButton" prefWidth="120.0" text="Generuj">
                 <font>
                     <Font size="14.0" />
                 </font>
             </Button>
+
         </HBox>
     </VBox>
 
