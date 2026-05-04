@@ -4,12 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Elgamal {
+    private final int KEY_BYTE_SIZE = 64;
+    private final int MAX_BLOCK_BYTE_SIZE;
+
     private final SecureRandom secureRandom;
     private final BigInteger p;
     private final BigInteger g;
@@ -18,10 +22,12 @@ public class Elgamal {
 
     public Elgamal() {
         secureRandom = new SecureRandom();
-        p = BigInteger.probablePrime(2048, secureRandom);
+        p = BigInteger.probablePrime(KEY_BYTE_SIZE * 8, secureRandom);
         g = generateRandomNumber(BigInteger.TWO, p.subtract(BigInteger.TWO));
         a = generateRandomNumber(BigInteger.TWO, p.subtract(BigInteger.TWO));
         h = g.modPow(a, p);
+
+        MAX_BLOCK_BYTE_SIZE = KEY_BYTE_SIZE - 1;
     }
 
     private BigInteger generateRandomNumber(BigInteger minNumber, BigInteger maxNumber) {
@@ -34,52 +40,42 @@ public class Elgamal {
         return randomNumber;
     }
 
-    public byte[] encipher(byte[] data) {
-        BigInteger[] dataBlocks = divideIntoBlocks(data);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    public byte[] encipher(byte[] data) throws IOException {
+        ByteArrayOutputStream encipheredDataByteStream = new ByteArrayOutputStream();
+        ByteBuffer dataBuffer = ByteBuffer.wrap(data);
 
-        try (DataOutputStream dos = new DataOutputStream(outputStream)) {
+        while (dataBuffer.hasRemaining()) {
+            int availableBytes = Math.min(MAX_BLOCK_BYTE_SIZE, dataBuffer.remaining());
+            byte[] blockBytes = new byte[availableBytes];
+            dataBuffer.get(blockBytes);
 
-            for (BigInteger block : dataBlocks) {
-                BigInteger r = generateRandomNumber(BigInteger.ONE, p.subtract(BigInteger.ONE));
+            BigInteger block = new BigInteger(1, blockBytes);
 
-                BigInteger c1 = encipherBlockC1(block, r);
-                BigInteger c2 = encipherBlockC2(block, r);
+            BigInteger r = generateRandomNumber(BigInteger.ONE, p.subtract(BigInteger.ONE));
+            BigInteger c1 = encipherBlockC1(r);
+            BigInteger c2 = encipherBlockC2(block, r);
 
-                byte[] c1Bytes = c1.toByteArray();
-                byte[] c2Bytes = c2.toByteArray();
+            byte[] c1Bytes = Utils.bigIntegerToByteArray(c1);
+            byte[] c2Bytes = Utils.bigIntegerToByteArray(c2);
 
+            int originalBlockSize = blockBytes.length;
+            int c1Size = c1Bytes.length;
+            int c2Size = c2Bytes.length;
 
-                IO.println("C1: " + c1Bytes.length);
-                IO.println("C2: " + c2Bytes.length);
+            ByteBuffer encipheredBlockBuffer = ByteBuffer.allocate(4 + 4 + c1Size + 4 + c2Size);
+            encipheredBlockBuffer.putInt(originalBlockSize);
+            encipheredBlockBuffer.putInt(c1Size);
+            encipheredBlockBuffer.put(c1Bytes);
+            encipheredBlockBuffer.putInt(c2Size);
+            encipheredBlockBuffer.put(c2Bytes);
 
-                if (c1Bytes.length > 0 && c1Bytes[0] == 0) {
-                    dos.writeShort(c1Bytes.length - 1);
-                    dos.write(c1Bytes, 1, c1Bytes.length - 1);
-                } else {
-                    dos.writeShort(c1Bytes.length);
-                    dos.write(c1Bytes);
-                }
-
-                if (c2Bytes.length > 0 && c2Bytes[0] == 0) {
-                    dos.writeShort(c2Bytes.length - 1);
-                    dos.write(c2Bytes, 1, c2Bytes.length - 1);
-                } else {
-                    dos.writeShort(c2Bytes.length);
-                    dos.write(c2Bytes);
-                }
-            }
-
-            dos.flush();
-            return outputStream.toByteArray();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            encipheredDataByteStream.write(encipheredBlockBuffer.array());
         }
 
-
+        return encipheredDataByteStream.toByteArray();
     }
 
-    private BigInteger encipherBlockC1(BigInteger block, BigInteger r) {
+    private BigInteger encipherBlockC1(BigInteger r) {
         return g.modPow(r, p);
     }
 
@@ -87,25 +83,56 @@ public class Elgamal {
         return block.multiply(h.modPow(r, p)).mod(p);
     }
 
-    public byte[] decipher(byte[] data) {
-        BigInteger[] dataBlocks = divideEncipheredIntoBlocks(data);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    public byte[] decipher(byte[] data) throws IOException {
+        ByteArrayOutputStream decipheredDataByteStream = new ByteArrayOutputStream();
+        ByteBuffer dataBuffer = ByteBuffer.wrap(data);
 
-        for (int i = 0; i < dataBlocks.length - 1; i++) {
-            BigInteger c1 = dataBlocks[i];
-            BigInteger c2 = dataBlocks[i + 1];
+        while (dataBuffer.hasRemaining()) {
+            int originalBlockSize = dataBuffer.getInt();
+
+            int c1Size = dataBuffer.getInt();
+            byte[] c1Bytes = new byte[c1Size];
+            dataBuffer.get(c1Bytes);
+            BigInteger c1 = new BigInteger(1, c1Bytes);
+
+            int c2Size = dataBuffer.getInt();
+            byte[] c2Bytes = new byte[c2Size];
+            dataBuffer.get(c2Bytes);
+            BigInteger c2 = new BigInteger(1, c2Bytes);
 
             BigInteger decipheredBlock = c2.multiply(c1.modPow(a, p).modInverse(p)).mod(p);
-            byte[] decipheredBlockBytes = decipheredBlock.toByteArray();
+            byte[] decipheredBlockBytes = Utils.bigIntegerToByteArray(decipheredBlock);
+            int decipheredBlockSize = decipheredBlockBytes.length;
 
-            if (decipheredBlockBytes.length > 0 && decipheredBlockBytes[0] == 0) {
-                outputStream.write(decipheredBlockBytes, 1, decipheredBlockBytes.length - 1);
-            } else {
-                outputStream.writeBytes(decipheredBlockBytes);
-            }
+            byte[] originalBlockBytes = new byte[originalBlockSize];
+
+            int offset = originalBlockSize - decipheredBlockSize;
+
+            System.arraycopy(decipheredBlockBytes, 0, originalBlockBytes, offset, decipheredBlockSize);
+
+            decipheredDataByteStream.write(originalBlockBytes);
         }
 
-        return outputStream.toByteArray();
+        return decipheredDataByteStream.toByteArray();
+
+//        BigInteger[] dataBlocks = divideEncipheredIntoBlocks(data);
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//
+//        for (int i = 0; i < dataBlocks.length - 1; i++) {
+//            BigInteger c1 = dataBlocks[i];
+//            BigInteger c2 = dataBlocks[i + 1];
+//
+//            BigInteger decipheredBlock = c2.multiply(c1.modPow(a, p).modInverse(p)).mod(p);
+//            byte[] decipheredBlockBytes = decipheredBlock.toByteArray();
+//
+//            if (decipheredBlockBytes.length > 0 && decipheredBlockBytes[0] == 0) {
+//                outputStream.write(decipheredBlockBytes, 1, decipheredBlockBytes.length - 1);
+//            } else {
+//                outputStream.writeBytes(decipheredBlockBytes);
+//            }
+//        }
+//
+//        return outputStream.toByteArray();
     }
 
 
