@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TextArea?>
@@ -19,7 +20,6 @@
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <!-- SEKCJA KLUCZA -->
     <VBox spacing="10.0">
         <HBox spacing="20.0">
             <fx:define>
@@ -33,7 +33,7 @@
             </RadioButton>
         </HBox>
 
-        <HBox spacing="10.0">
+        <HBox spacing="10.0" alignment="CENTER_LEFT">
             <StackPane HBox.hgrow="ALWAYS">
                 <HBox fx:id="publicKeyBox" spacing="10.0">
                     <TextField fx:id="pubKeyP" promptText="p (Liczba pierwsza)" HBox.hgrow="ALWAYS">
@@ -48,11 +48,18 @@
                 </HBox>
 
                 <HBox fx:id="privateKeyBox" spacing="10.0" visible="false">
+                    <!-- Dodano pole p do deszyfrowania, gdyż jest niezbędne do operacji modulo -->
+                    <TextField fx:id="privKeyP" promptText="p (Liczba pierwsza)" HBox.hgrow="ALWAYS">
+                        <font><Font size="14.0" /></font>
+                    </TextField>
                     <TextField fx:id="privKeyX" promptText="x (Klucz prywatny)" HBox.hgrow="ALWAYS">
                         <font><Font size="14.0" /></font>
                     </TextField>
                 </HBox>
             </StackPane>
+
+            <!-- NOWY ELEMENT: Lista rozwijana z długością klucza -->
+            <ComboBox fx:id="keyLengthComboBox" prefWidth="100.0" promptText="Bity" />
 
             <Button fx:id="generateKeyButton" prefWidth="120.0" text="Generuj">
                 <font>
@@ -60,17 +67,9 @@
                 </font>
             </Button>
         </HBox>
-
-        <HBox spacing="10.0">
-            <Button fx:id="loadKeyButton" text="wczytaj klucz z pliku" />
-            <Region HBox.hgrow="ALWAYS" />
-            <Button fx:id="saveKeyButton" text="zapisz klucz do pliku" />
-        </HBox>
     </VBox>
 
-    <!-- SEKCJA WEJŚCIA / WYJŚCIA -->
     <HBox spacing="20.0" VBox.vgrow="ALWAYS">
-        <!-- Input -->
         <VBox prefWidth="250.0" spacing="10.0" HBox.hgrow="ALWAYS">
             <Label text="Input">
                 <font><Font name="System Bold" size="12.0" /></font>
@@ -82,7 +81,6 @@
             <TextArea fx:id="inputTextArea" promptText="podaj tekst..." wrapText="true" VBox.vgrow="ALWAYS" />
         </VBox>
 
-        <!-- Akcje centralne -->
         <VBox alignment="CENTER_LEFT" prefWidth="150.0" spacing="15.0">
             <fx:define>
                 <ToggleGroup fx:id="inputTypeGroup" />
@@ -96,7 +94,6 @@
 
             <Region prefHeight="20.0" />
 
-            <!-- NOWY PRZYCISK KONWERTUJ -->
             <Button fx:id="convertButton" maxWidth="1.7976931348623157E308" text="konwertuj">
                 <font><Font name="System normal" size="14.0" /></font>
             </Button>

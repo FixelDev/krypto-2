@@ -7,9 +7,12 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import pl.lodz.p.logic.Dao;
+import pl.lodz.p.logic.Elgamal;
 
+import javax.crypto.KeyGenerator;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,18 +25,19 @@ public class HelloController {
     @FXML private TextArea inputTextArea;
     @FXML private Button saveOutputFileButton;
     @FXML private TextArea outputTextArea;
-    @FXML private Button saveKeyButton;
     @FXML private Button generateKeyButton;
-    @FXML private Button loadKeyButton;
     @FXML private ToggleGroup inputTypeGroup;
     @FXML private RadioButton radioEncryptMode;
     @FXML private HBox publicKeyBox;
     @FXML private HBox privateKeyBox;
     @FXML private Button convertButton;
+    @FXML private ComboBox<String> keyLengthComboBox;
 
     private byte[] keyBytes;
     private byte[] inputDataBytes;
     private byte[] outputDataBytes;
+
+    private KeyGenerator keyGenerator;
 
     private enum MODE{
         SAVE,
@@ -55,19 +59,19 @@ public class HelloController {
 
         generateKeyButton.setOnAction(event -> generateKey());
 
-        loadKeyButton.setOnAction(event -> {
-            loadKeyFromFile();
-        });
-
-        saveKeyButton.setOnAction(event -> {
-            saveKeyToFile();
-        });
-
         convertButton.setOnAction(event -> {
             if (radioEncryptMode.isSelected()) {
-                // Tutaj metoda szyfrująca
+                if (getSelectedDataType() == DATA_TYPE.TEXT) {
+                    encipherText();
+                } else {
+                    encipherFile();
+                }
             } else {
-                // Tutaj metoda deszyfrująca
+                if (getSelectedDataType() == DATA_TYPE.TEXT) {
+                    decipherText();
+                } else {
+                    decipherFile();
+                }
             }
         });
 
@@ -77,6 +81,14 @@ public class HelloController {
 
         saveOutputFileButton.setOnAction(event -> {
             saveFile();
+        });
+
+        keyLengthComboBox.getItems().addAll("2048", "1024", "512");
+        keyLengthComboBox.getSelectionModel().selectFirst();
+
+        generateKeyButton.setOnAction(event -> {
+            String selectedBits = keyLengthComboBox.getValue();
+            int bits = Integer.parseInt(selectedBits);
         });
     }
 
@@ -133,16 +145,22 @@ public class HelloController {
         alert.show();
     }
 
+    private void getWantedKeyLength(){
+
+    }
+
+
+    // TODO: przerobić na pozostałe długości
     private boolean isKeyInvalid() {
         if (keyBytes.length != 24) {
-            showAlert(Alert.AlertType.ERROR, "Błąd", "Podany klyucz nie ma 24 bajtów. Podaj poprawny klucz");
+            showAlert(Alert.AlertType.ERROR, "Błąd", "Podany klucz nie ma wymaganej długości. Podaj poprawny klucz");
             return true;
         }
         return false;
     }
 
     private void saveFile() {
-        Window mainWindow = loadKeyButton.getScene().getWindow();
+        Window mainWindow = loadInputFileButton.getScene().getWindow();
         Path path = null;
         try {
             path = chooseFilePath(mainWindow, "Zapisz plik", MODE.SAVE);
@@ -154,7 +172,7 @@ public class HelloController {
     }
 
     private void loadFile() {
-        Window mainWindow = loadKeyButton.getScene().getWindow();
+        Window mainWindow = loadInputFileButton.getScene().getWindow();
         Path path = null;
         try {
             path = chooseFilePath(mainWindow, "Wczytaj plik", MODE.LOAD);
@@ -167,54 +185,17 @@ public class HelloController {
         inputFileInfoText.setText("Załadowano plik " + path.getFileName());
     }
 
-    private void saveKeyToFile() {
-        Window mainWindow = loadKeyButton.getScene().getWindow();
-        Path path = null;
-        try {
-            path = chooseFilePath(mainWindow, "Zapisz klucz", MODE.SAVE);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-//        Dao.writeToFile(path, keyBytes);
-    }
-
-    private void loadKeyFromFile() {
-        Window mainWindow = loadKeyButton.getScene().getWindow();
-        Path path = null;
-        try {
-            path = chooseFilePath(mainWindow, "Wczutaj plik z kluczem", MODE.LOAD);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            keyBytes = Dao.readFromFile(path);
-
-            updateKeyTextField();
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private long[] keyBytesToLong() {
-        long[] key = new long[3];
-
-        for (int i = 0; i < 3; i++) {
-            byte[] keyB = new byte[8];
-            System.arraycopy(keyBytes, i * 8, keyB, 0, 8);
-
-
-        }
-        return key;
-    }
-
     private void encipher() {
         if (inputDataBytes == null || inputDataBytes.length == 0) {
             throw new NullPointerException();
         }
 
-
+        Elgamal elgamal = new Elgamal(, keyGenerator.getP(), keyGenerator.getG(), keyGenerator.getA(), keyGenerator.getH());
+        try {
+            outputDataBytes = elgamal.encipher(inputDataBytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void decipher() {
@@ -222,12 +203,22 @@ public class HelloController {
             throw new NullPointerException();
         }
 
-
+        Elgamal elgamal = new Elgamal(, keyGenerator.getP(), keyGenerator.getG(), keyGenerator.getA(), keyGenerator.getH());
+        try {
+            outputDataBytes = elgamal.decipher(inputDataBytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+
+    // TODO: uaktualnić
     private void generateKey() {
 //        keyBytes = keyGenerator.getRandomKey();
 //        updateKeyTextField();
+
+        keyGenerator = new KeyGenerator();
+
     }
 
     private void updateKeyTextField() {

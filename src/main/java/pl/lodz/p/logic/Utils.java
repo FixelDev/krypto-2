@@ -1,6 +1,7 @@
 package pl.lodz.p.logic;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Arrays;
 
 public final class Utils {
@@ -13,5 +14,15 @@ public final class Utils {
         }
 
         return array;
+    }
+
+    public static BigInteger generateRandomNumber(BigInteger minNumber, BigInteger maxNumber) {
+        BigInteger randomNumber;
+
+        do {
+            randomNumber = new BigInteger(maxNumber.bitLength(), new SecureRandom());
+        } while (randomNumber.compareTo(minNumber) < 0 || randomNumber.compareTo(maxNumber) > 0);
+
+        return randomNumber;
     }
 }

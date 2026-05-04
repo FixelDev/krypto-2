@@ -11,34 +11,24 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Elgamal {
-    private final int KEY_BYTE_SIZE = 64;
+    private final int KEY_BYTE_SIZE;
     private final int MAX_BLOCK_BYTE_SIZE;
 
-    private final SecureRandom secureRandom;
     private final BigInteger p;
     private final BigInteger g;
     private final BigInteger a;
     private final BigInteger h;
 
-    public Elgamal() {
-        secureRandom = new SecureRandom();
-        p = BigInteger.probablePrime(KEY_BYTE_SIZE * 8, secureRandom);
-        g = generateRandomNumber(BigInteger.TWO, p.subtract(BigInteger.TWO));
-        a = generateRandomNumber(BigInteger.TWO, p.subtract(BigInteger.TWO));
-        h = g.modPow(a, p);
+    public Elgamal(int keyByteSize, BigInteger p, BigInteger g, BigInteger a, BigInteger h) {
+        KEY_BYTE_SIZE = keyByteSize;
         MAX_BLOCK_BYTE_SIZE = KEY_BYTE_SIZE - 1;
+
+        this.p = p;
+        this.g = g;
+        this.a = a;
+        this.h = h;
     }
 
-
-    private BigInteger generateRandomNumber(BigInteger minNumber, BigInteger maxNumber) {
-        BigInteger randomNumber;
-
-        do {
-            randomNumber = new BigInteger(maxNumber.bitLength(), secureRandom);
-        } while (randomNumber.compareTo(minNumber) < 0 || randomNumber.compareTo(maxNumber) > 0);
-
-        return randomNumber;
-    }
 
     public byte[] encipher(byte[] data) throws IOException {
         ByteArrayOutputStream encipheredDataByteStream = new ByteArrayOutputStream();
@@ -51,7 +41,7 @@ public class Elgamal {
 
             BigInteger block = new BigInteger(1, blockBytes);
 
-            BigInteger r = generateRandomNumber(BigInteger.ONE, p.subtract(BigInteger.ONE));
+            BigInteger r = Utils.generateRandomNumber(BigInteger.ONE, p.subtract(BigInteger.ONE));
             BigInteger c1 = encipherBlockC1(r);
             BigInteger c2 = encipherBlockC2(block, r);
 
