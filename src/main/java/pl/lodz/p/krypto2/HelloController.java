@@ -182,9 +182,9 @@ public class HelloController {
         if (inputDataBytes == null || inputDataBytes.length == 0) {
             throw new NullPointerException();
         }
+        IO.println(privKeyX.getText());
 
         Elgamal elgamal = new Elgamal(wantedKeyLength / 8, new BigInteger(pubKeyP.getText().trim(), 16), new BigInteger(pubKeyG.getText().trim(), 16), new BigInteger(privKeyX.getText().trim(), 16), new BigInteger(pubKeyH.getText().trim(), 16));
-
         try {
             outputDataBytes = elgamal.encipher(inputDataBytes);
         } catch (IOException e) {
@@ -196,8 +196,10 @@ public class HelloController {
         if (inputDataBytes == null || inputDataBytes.length == 0) {
             throw new NullPointerException();
         }
+        IO.println(privKeyX.getText());
 
         Elgamal elgamal = new Elgamal(wantedKeyLength / 8, new BigInteger(pubKeyP.getText().trim(), 16), new BigInteger(pubKeyG.getText().trim(), 16), new BigInteger(privKeyX.getText().trim(), 16), new BigInteger(pubKeyH.getText().trim(), 16));
+
         try {
             outputDataBytes = elgamal.decipher(inputDataBytes);
         } catch (IOException e) {

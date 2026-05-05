@@ -98,6 +98,10 @@ public class Elgamal {
 
             int offset = originalBlockSize - decipheredBlockSize;
 
+            if (offset < 0) {
+                return decipheredDataByteStream.toByteArray();
+            }
+
             System.arraycopy(decipheredBlockBytes, 0, originalBlockBytes, offset, decipheredBlockSize);
 
             decipheredDataByteStream.write(originalBlockBytes);

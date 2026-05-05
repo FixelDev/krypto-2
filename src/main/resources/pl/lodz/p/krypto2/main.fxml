@@ -38,7 +38,7 @@
                 <!-- Kontener klucza publicznego -->
                 <HBox fx:id="publicKeyBox" spacing="10.0">
                     <VBox HBox.hgrow="ALWAYS" spacing="5.0">
-                        <Label text="p (Liczba pierwsza)">
+                        <Label text="p">
                             <font><Font name="System Bold" size="12.0" /></font>
                         </Label>
                         <TextField fx:id="pubKeyP" promptText="Wartość p" VBox.vgrow="ALWAYS">
@@ -47,7 +47,7 @@
                     </VBox>
 
                     <VBox HBox.hgrow="ALWAYS" spacing="5.0">
-                        <Label text="g (Generator)">
+                        <Label text="g">
                             <font><Font name="System Bold" size="12.0" /></font>
                         </Label>
                         <TextField fx:id="pubKeyG" promptText="Wartość g" VBox.vgrow="ALWAYS">
@@ -56,7 +56,7 @@
                     </VBox>
 
                     <VBox HBox.hgrow="ALWAYS" spacing="5.0">
-                        <Label text="h (Klucz publiczny)">
+                        <Label text="h">
                             <font><Font name="System Bold" size="12.0" /></font>
                         </Label>
                         <TextField fx:id="pubKeyH" promptText="Wartość h" VBox.vgrow="ALWAYS">
